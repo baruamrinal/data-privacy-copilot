@@ -108,12 +108,14 @@ Response (`document_id` is a new UUID on every upload):
 ```json
 {
   "message": "Document indexed in Qdrant successfully",
-  "document_id": "250d6d71-1f50-4975-920b-405faae5e672",
+  "document_id": "ffa89079-6903-4f91-b0ea-b61d83071bac",
   "filename": "Quillfeather-Online-DPA.pdf",
-  "total_chunks": 74,
-  "vectors_stored": 74
+  "total_chunks": 22,
+  "vectors_stored": 22
 }
 ```
+
+PDFs are split into chunks of about 900 characters with 150 characters of overlap. Page headers and footers that repeat on at least half the pages are removed before chunking, so they don't appear in matches.
 
 Upload each document only once. Re-uploading indexes it again and creates duplicate matches.
 
@@ -141,34 +143,35 @@ Response, with only the Quillfeather DPA uploaded (the `answer` wording varies b
 {
   "question": "Does this agreement allow cross-border transfer of personal data?",
   "expanded_query": "does this agreement allow cross-border transfer of personal data? international transfer data transfer transfer outside EEA standard contractual clauses SCC",
-  "answer": "Yes, the agreement allows cross-border transfer of personal data.\n\nClause 1 states that if personal data is transferred to a country that has not received an adequacy decision, the parties agree to use the Standard Contractual Clauses (SCCs), specifically Module Two (Controller to Processor) and, where applicable, Module Three (Processor to Processor). This indicates that cross-border transfers are permitted, provided appropriate safeguards (such as SCCs) are in place.\n\nClause 2 and Clause 3 further reference the possibility of subprocessors accessing personal data from different locations and specify hosting locations, supporting the interpretation that cross-border transfers are contemplated.\n\nReferences: Clause 1, Clause 2, Clause 3.",
+  "answer": "Yes, this agreement allows cross-border transfer of personal data.\n\nClause 2 (11.2) states that for transfers of personal data originating from the European Economic Area (EEA) to countries without an adequacy decision, the parties agree to incorporate the Standard Contractual Clauses (SCCs) into the Data Processing Agreement (DPA). Clause 1 (11.3) further addresses transfers from the United Kingdom and Switzerland, specifying the application of the UK Addendum and the SCCs, respectively. Additionally, Clause 2 (11.1) notes that personal data may be hosted in the United States or the European Union, and subprocessors may access personal data from locations listed in Schedule C.\n\nTherefore, the agreement explicitly provides mechanisms (such as SCCs and the UK Addendum) to permit cross-border transfers of personal data.",
   "total_matches": 3,
   "matches": [
     {
-      "vector_score": 0.636,
-      "rerank_score": 0.223,
+      "vector_score": 0.701,
+      "rerank_score": 0.946,
       "document": "Quillfeather-Online-DPA.pdf",
-      "text": "transferred to a country that has not received an adequacy decision, the parties agree that Module Two\n(Controller to Processor) and, where applicable, Module Three (Processor to Processor) of the SCCs are"
+      "text": "applies; in Clause 9 Option 2 (general written authorization) applies with the notice period set out in Section\n5.3; in Clause 11 the optional language does not apply; in Clauses 17 and 18 the governing law and courts\nare those of Ireland. Annexes I and II of the SCCs are completed by Schedules A and B.\n11.3 UK and Swiss Transfers. For transfers from the United Kingdom, the UK Addendum applies, with\nTable 4 selecting that neither party may terminate the UK Addendum. For transfers from Switzerland, the\nSCCs apply with references to the GDPR read as references to the Swiss Federal Act on Data Protection,\nand the competent supervisory authority is the Swiss Federal Data Protection and Information Commissioner.\n11.4 Data Privacy Framework. Quillfeather self-certifies to the EU-U.S. Data Privacy Framework, the UK"
     },
     {
-      "vector_score": 0.676,
-      "rerank_score": 0.174,
+      "vector_score": 0.708,
+      "rerank_score": 0.054,
       "document": "Quillfeather-Online-DPA.pdf",
-      "text": "States (default) or the European Union (Frankfurt, Germany). Subprocessors may access Personal Data\nfrom the locations listed in Schedule C.\n11.2 EEA Transfers. To the extent Personal Data originating from the European Economic Area is"
+      "text": "11. International Data Transfers\n11.1 Hosting Location. Personal Data is hosted in the data center region selected by Customer: the United\nStates (default) or the European Union (Frankfurt, Germany). Subprocessors may access Personal Data\nfrom the locations listed in Schedule C.\n11.2 EEA Transfers. To the extent Personal Data originating from the European Economic Area is\ntransferred to a country that has not received an adequacy decision, the parties agree that Module Two\n(Controller to Processor) and, where applicable, Module Three (Processor to Processor) of the SCCs are\nincorporated into this DPA by reference, with the following selections: in Clause 7 the optional docking clause\napplies; in Clause 9 Option 2 (general written authorization) applies with the notice period set out in Section"
     },
     {
-      "vector_score": 0.642,
-      "rerank_score": 0.13,
+      "vector_score": 0.644,
+      "rerank_score": 0.028,
       "document": "Quillfeather-Online-DPA.pdf",
-      "text": "100 Example Avenue, Suite 400, Springfield, EX 00000\nPage 3 of 6  |  FICTIONAL SAMPLE - NOT A REAL AGREEMENT\nfollowing a Personal Data Breach.\n11. International Data Transfers\n11.1 Hosting Location. Personal Data is hosted in the data center region selected by Customer: the United"
+      "text": "Nature and purpose of Processing: Collection, storage, analysis, and visualization of product usage data\nto provide Customer with product analytics, reporting, experimentation, and customer support.\nRetention: As described in Section 9 of the DPA.\nTransfers to Subprocessors: As described in Schedule C, for the duration of the Agreement.\nC. Competent Supervisory Authority\nThe supervisory authority of the EU Member State in which Customer is established or, where Customer is\nnot established in the EU, the Irish Data Protection Commission.\nSchedule B - Technical and Organizational Security Measures (Annex II to the SCCs)\nEncryption. Personal Data is encrypted in transit using TLS 1.2 or higher and at rest using AES-256.\nEncryption keys are managed in a dedicated key management service and rotated at least annually."
     }
   ]
 }
 ```
 
-- `answer`: GPT-4.1 response based only on the top 3 reranked clauses. "Clause 1, 2, 3" refer to the order of the retrieved chunks, not the agreement's section numbers.
+- `answer`: GPT-4.1 response based only on the top 3 reranked clauses. "Clause 1, 2, 3" is the order of the retrieved chunks; the numbers in brackets, such as "(11.2)", are the agreement's own section numbers.
 - `expanded_query`: the question plus synonyms, when it contains keywords such as `pii`, `gdpr`, `cross-border` or `retention`.
-- `vector_score`: cosine similarity from Qdrant. `rerank_score`: cross-encoder relevance (higher is better). Results are sorted by `rerank_score`.
+- `vector_score`: cosine similarity from Qdrant, used to shortlist 10 candidates. For this embedding model, about 0.75+ is a strong match and 0.65–0.75 is related.
+- `rerank_score`: cross-encoder relevance from 0 to 1. Above 0.7 means the chunk answers the question; below 0.3 is weak evidence. Results are sorted by this score, and all top 3 are sent to GPT-4.1 regardless of score.
 - `text`: the matched chunk, truncated to 1,200 characters.
 
 ## 6. Run the tests
