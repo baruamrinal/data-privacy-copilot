@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Qdrant local storage
+qdrant_storage/
+
+# OS / editor
+.DS_Store
+.vscode/
