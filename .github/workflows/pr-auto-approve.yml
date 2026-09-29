@@ -1,0 +1,92 @@
+name: Test and auto-approve PR
+
+# Approves a PR when all tests pass and coverage of rag-system/app is >= 90%.
+# Otherwise requests changes, which replaces any earlier bot approval.
+# Requires: Settings > Actions > General > Workflow permissions >
+#   "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-auto-approve-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  COVERAGE_THRESHOLD: 90
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rag-system
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            rag-system/requirements.txt
+            rag-system/requirements-dev.txt
+
+      # CPU-only torch keeps the install small; tests stub the models anyway
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        run: |
+          python -m pytest \
+            --cov=app \
+            --cov-report=term-missing \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }} \
+            | tee pytest-output.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Add coverage to job summary
+        if: always()
+        run: |
+          {
+            echo "### Test results"
+            echo '```'
+            sed -n '/coverage:/,$p' pytest-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  approve:
+    needs: test
+    if: success() && !github.event.pull_request.head.repo.fork
+    runs-on: ubuntu-latest
+    steps:
+      - name: Approve PR
+        run: |
+          gh pr review "$PR" --approve \
+            --body "All tests passed and coverage is at least ${COVERAGE_THRESHOLD}%."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+
+  request-changes:
+    needs: test
+    if: failure() && !github.event.pull_request.head.repo.fork
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request changes
+        run: |
+          gh pr review "$PR" --request-changes \
+            --body "Auto-approval blocked: tests failed or coverage is below ${COVERAGE_THRESHOLD}%. See ${RUN_URL}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
