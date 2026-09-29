@@ -170,3 +170,18 @@ Response, with only the Quillfeather DPA uploaded (the `answer` wording varies b
 - `expanded_query`: the question plus synonyms, when it contains keywords such as `pii`, `gdpr`, `cross-border` or `retention`.
 - `vector_score`: cosine similarity from Qdrant. `rerank_score`: cross-encoder relevance (higher is better). Results are sorted by `rerank_score`.
 - `text`: the matched chunk, truncated to 1,200 characters.
+
+## 6. Run the tests
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+For a coverage report, listing the lines each file's tests don't reach:
+
+```bash
+python -m pytest --cov=app --cov-report=term-missing
+```
+
+The tests run offline. They replace the embedding and reranker models with lightweight fakes, use an in-memory Qdrant instead of `localhost:6333`, and stub the OpenAI client, so you don't need Docker or an API key.
