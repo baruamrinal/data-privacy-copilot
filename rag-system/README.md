@@ -91,6 +91,18 @@ curl.exe -X POST "http://127.0.0.1:8000/upload-document" `
   -F "file=@..\input-files\Amplitude-Online-DPA.pdf"
 ```
 
+**Fictional sample DPA (exported from Postman)**
+
+[`Quillfeather-Online-DPA.pdf`](../input-files/Quillfeather-Online-DPA.pdf) is a made-up agreement for testing. Run from `rag-system/` in bash or Git Bash:
+
+```bash
+curl --location 'http://127.0.0.1:8000/upload-document' \
+--header 'accept: application/json' \
+--form 'file=@"../input-files/Quillfeather-Online-DPA.pdf"'
+```
+
+Don't set a `Content-Type` header manually for uploads. `--form` sets it, including the multipart boundary.
+
 Response (example values):
 
 ```json

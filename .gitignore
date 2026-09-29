@@ -4,6 +4,9 @@
 # Private documents
 POC_ Intelligent Data Privacy & Compliance Copilot.pdf
 
+# Third-party documents (not ours to redistribute)
+input-files/Amplitude-Online-DPA.pdf
+
 # Documents uploaded through the API
 rag-system/data/uploads/*
 !rag-system/data/uploads/.gitkeep
