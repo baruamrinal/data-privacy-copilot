@@ -5,7 +5,8 @@
 POC_ Intelligent Data Privacy & Compliance Copilot.pdf
 
 # Documents uploaded through the API
-rag-system/data/uploads/
+rag-system/data/uploads/*
+!rag-system/data/uploads/.gitkeep
 
 # Python
 venv/
