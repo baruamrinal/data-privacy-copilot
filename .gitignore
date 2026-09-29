@@ -17,6 +17,11 @@ venv/
 __pycache__/
 *.pyc
 
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Qdrant local storage
 qdrant_storage/
 
