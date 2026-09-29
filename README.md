@@ -13,8 +13,8 @@ Analyze: question → vector search (top 15) → GPT-4.1 → structured JSON com
 | Component | Technology |
 |---|---|
 | API | FastAPI + Uvicorn |
-| Parsing | PyMuPDF (PDF), python-docx (DOCX) |
-| Chunking | LangChain `RecursiveCharacterTextSplitter` (300 chars, 80 overlap) |
+| Parsing | PyMuPDF (PDF, with repeated page headers/footers removed), python-docx (DOCX) |
+| Chunking | LangChain `RecursiveCharacterTextSplitter` (900 chars, 150 overlap) |
 | Embeddings | `BAAI/bge-large-en-v1.5` (sentence-transformers) |
 | Reranking | `BAAI/bge-reranker-large` cross-encoder |
 | Vector store | Qdrant (collection `privacy_compliance_docs`) |
