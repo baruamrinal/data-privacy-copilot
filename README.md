@@ -24,6 +24,7 @@ Analyze: question → vector search (top 15) → GPT-4.1 → structured JSON com
 
 ```
 data-privacy-copilot/
+├── .github/workflows/           # CI: tests, coverage and PR auto-approval
 ├── input-files/                 # Sample DPA (fictional Quillfeather-Online-DPA.pdf)
 └── rag-system/
     ├── app/
@@ -34,8 +35,11 @@ data-privacy-copilot/
     │   ├── embeddings/          # Embedding model
     │   ├── vector_store/        # Qdrant (active) and FAISS stores
     │   └── llm/                 # OpenAI client and prompts
+    ├── tests/                   # pytest suite (offline: models, Qdrant and OpenAI are faked)
     ├── data/uploads/            # Uploaded files
     ├── requirements.txt
+    ├── requirements-dev.txt     # Test dependencies (pytest, pytest-cov, httpx)
+    ├── pytest.ini
     └── .env.example
 ```
 
@@ -145,6 +149,25 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/query `
   }
 }
 ```
+
+## Testing
+
+From `rag-system/`:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest --cov=app --cov-report=term-missing
+```
+
+The tests run offline. The embedding and reranker models are replaced with lightweight fakes, Qdrant runs in memory, and the OpenAI client is stubbed, so you don't need Docker, an API key or model downloads.
+
+On every pull request to `main`, the [CI workflow](.github/workflows/pr-auto-approve.yml):
+
+- runs the tests and posts a per-file coverage table as a PR comment
+- approves the PR if all tests pass and coverage is at least 90%
+- requests changes otherwise
+
+See [rag-system/README.md](rag-system/README.md#6-run-the-tests) for details.
 
 ## Troubleshooting
 
