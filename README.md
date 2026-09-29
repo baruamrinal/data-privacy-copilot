@@ -152,3 +152,7 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/query `
 - **OpenAI authentication error**: check `OPENAI_API_KEY` in `rag-system/.env`.
 - **`JSON decode error` from curl on Windows**: PowerShell 7.3+ passes `\"` literally. Use `Invoke-RestMethod` as shown above, or single-quoted JSON without backslashes.
 - **`Activate.ps1` is blocked**: run `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` once.
+
+## License
+
+[MIT](LICENSE)

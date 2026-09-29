@@ -1,6 +1,12 @@
 # Secrets
 .env
 
+# Private documents
+POC_ Intelligent Data Privacy & Compliance Copilot.pdf
+
+# Documents uploaded through the API
+rag-system/data/uploads/
+
 # Python
 venv/
 __pycache__/
