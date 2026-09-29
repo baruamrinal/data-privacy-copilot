@@ -196,7 +196,9 @@ Every PR to `main` runs [`.github/workflows/pr-auto-approve.yml`](../.github/wor
 - all tests pass, and
 - coverage of `app/` is at least 90%.
 
-Otherwise it requests changes, with a link to the failing run. Each new push re-runs the check. To check locally before pushing:
+Otherwise it requests changes, with a link to the failing run. Each new push re-runs the check.
+
+The bot also posts a per-file coverage table (statements, missed lines, coverage %) as a PR comment. It updates that one comment on each push rather than adding new ones. To check locally before pushing:
 
 ```bash
 python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=90
