@@ -188,3 +188,16 @@ python -m pytest --cov=app --cov-report=term-missing
 ```
 
 The tests run offline. They replace the embedding and reranker models with lightweight fakes, use an in-memory Qdrant instead of `localhost:6333`, and stub the OpenAI client, so you don't need Docker or an API key.
+
+### Pull request auto-approval
+
+Every PR to `main` runs [`.github/workflows/pr-auto-approve.yml`](../.github/workflows/pr-auto-approve.yml). The bot approves the PR only if:
+
+- all tests pass, and
+- coverage of `app/` is at least 90%.
+
+Otherwise it requests changes, with a link to the failing run. Each new push re-runs the check. To check locally before pushing:
+
+```bash
+python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=90
+```
