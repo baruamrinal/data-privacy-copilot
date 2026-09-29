@@ -75,12 +75,14 @@ Interactive API docs: http://127.0.0.1:8000/docs
 
 ### Upload a document
 
+The examples use [`Quillfeather-Online-DPA.pdf`](../input-files/Quillfeather-Online-DPA.pdf), a fictional agreement included for testing.
+
 **macOS / Linux**
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/upload-document" \
   -H "accept: application/json" \
-  -F "file=@../input-files/Amplitude-Online-DPA.pdf"
+  -F "file=@../input-files/Quillfeather-Online-DPA.pdf"
 ```
 
 **Windows (PowerShell)**
@@ -88,12 +90,10 @@ curl -X POST "http://127.0.0.1:8000/upload-document" \
 ```powershell
 curl.exe -X POST "http://127.0.0.1:8000/upload-document" `
   -H "accept: application/json" `
-  -F "file=@..\input-files\Amplitude-Online-DPA.pdf"
+  -F "file=@..\input-files\Quillfeather-Online-DPA.pdf"
 ```
 
-**Fictional sample DPA (exported from Postman)**
-
-[`Quillfeather-Online-DPA.pdf`](../input-files/Quillfeather-Online-DPA.pdf) is a made-up agreement for testing. Run from `rag-system/` in bash or Git Bash:
+**Postman export (bash / Git Bash)**
 
 ```bash
 curl --location 'http://127.0.0.1:8000/upload-document' \
@@ -109,7 +109,7 @@ Response (example values):
 {
   "message": "Document indexed in Qdrant successfully",
   "document_id": "df0aed6e-230c-4f55-8f7a-5d9b3545bf1a",
-  "filename": "Amplitude-Online-DPA.pdf",
+  "filename": "Quillfeather-Online-DPA.pdf",
   "total_chunks": 120,
   "vectors_stored": 120
 }

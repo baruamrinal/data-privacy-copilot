@@ -24,7 +24,7 @@ Analyze: question → vector search (top 15) → GPT-4.1 → structured JSON com
 
 ```
 data-privacy-copilot/
-├── input-files/                 # Sample DPA documents
+├── input-files/                 # Sample DPA (fictional Quillfeather-Online-DPA.pdf)
 └── rag-system/
     ├── app/
     │   ├── main.py              # FastAPI app entry point
@@ -110,7 +110,7 @@ macOS / Linux:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/upload-document \
-  -F "file=@../input-files/Amplitude-Online-DPA.pdf"
+  -F "file=@../input-files/Quillfeather-Online-DPA.pdf"
 
 curl -X POST http://127.0.0.1:8000/query \
   -H "Content-Type: application/json" \
@@ -121,7 +121,7 @@ Windows PowerShell:
 
 ```powershell
 curl.exe -X POST http://127.0.0.1:8000/upload-document `
-  -F "file=@..\input-files\Amplitude-Online-DPA.pdf"
+  -F "file=@..\input-files\Quillfeather-Online-DPA.pdf"
 
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/query `
   -ContentType "application/json" `
