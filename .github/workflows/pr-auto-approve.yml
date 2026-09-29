@@ -2,6 +2,7 @@ name: Test and auto-approve PR
 
 # Approves a PR when all tests pass and coverage of rag-system/app is >= 90%.
 # Otherwise requests changes, which replaces any earlier bot approval.
+# Posts a per-file coverage table as a single PR comment, updated on each push.
 # Requires: Settings > Actions > General > Workflow permissions >
 #   "Allow GitHub Actions to create and approve pull requests".
 
@@ -44,6 +45,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run tests with coverage
+        id: tests
         run: |
           python -m pytest \
             --cov=app \
@@ -52,15 +54,50 @@ jobs:
             | tee pytest-output.txt
           exit ${PIPESTATUS[0]}
 
-      - name: Add coverage to job summary
-        if: always()
+      - name: Build coverage report
+        if: always() && hashFiles('rag-system/.coverage') != ''
+        env:
+          OUTCOME: ${{ steps.tests.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          if [ "$OUTCOME" = "success" ]; then
+            status="✅ Passed"
+          else
+            status="❌ Failed"
+          fi
+          # e.g. "27 passed in 20.1s" from pytest's final summary line
+          results=$(grep -E '^=+ .*(passed|failed|error).* =+$' pytest-output.txt | tail -n 1 | sed -E 's/^=+ | =+$//g')
+
           {
-            echo "### Test results"
-            echo '```'
-            sed -n '/coverage:/,$p' pytest-output.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo "<!-- coverage-report -->"
+            echo "## Test coverage: $status"
+            echo
+            echo "**Tests:** ${results:-see run log} &nbsp;|&nbsp; **Required coverage:** ${COVERAGE_THRESHOLD}%"
+            echo
+            python -m coverage report --format=markdown --show-missing
+            echo
+            echo "[View workflow run]($RUN_URL)"
+          } > coverage-comment.md
+
+          cat coverage-comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      # One comment per PR, updated in place on every push
+      - name: Post coverage comment on PR
+        if: always() && hashFiles('rag-system/coverage-comment.md') != '' && !github.event.pull_request.head.repo.fork
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          comment_id=$(gh api "repos/$GH_REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- coverage-report -->"))) | .id' \
+            | head -n 1)
+
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/$GH_REPO/issues/comments/$comment_id" -F body=@coverage-comment.md > /dev/null
+          else
+            gh pr comment "$PR" --body-file coverage-comment.md
+          fi
 
   approve:
     needs: test
